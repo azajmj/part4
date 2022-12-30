@@ -33,7 +33,7 @@ int main() {
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     // cast the port to htons.
     // todo - we will need to change it to the user input port.
-    addr.sin_port = htons(8080);
+    addr.sin_port = htons(1025);
 
     // explicit casting from sockaddr_in to sockaddr*
     //        int x = 5;
@@ -49,7 +49,7 @@ int main() {
 
     //todo - this is just for now, in order to check the connection.
     // need to change to the input: vector,metric and k.
-    string message = "Hello from client";
+    string message = "2 3 4 5 MAN 3";
     // c_str() convert the string from string to const char*, as needed in send function.
     if (send(sock,message.c_str(), message.size(), 0) < 0){
         cout << "Error sending message " << endl;

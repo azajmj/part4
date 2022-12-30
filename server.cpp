@@ -6,16 +6,16 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
-#include <cstudio>
 #include <vector>
+#include <cctype>
 #include "knn.h"
-
+// #include <cstudio>
 
 #define MAX_MSG 100
 
 int main(int argc, char *argv[]) {
-    int port = argv[2]
-    string file = argv[1]
+    int port = atoi(argv[2]);
+    string file(argv[1]);
     const int server_port = port;
     int sock  = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
@@ -42,14 +42,24 @@ int main(int argc, char *argv[]) {
     int expected_data_len = sizeof(buffer);
     int read_bytes = recv(client_sock, buffer, expected_data_len,0);
     if (read_bytes == 0) {
-        //connection is closed?
+        perror("error lost connection to cleint");
     }
     else if (read_bytes < 0) {
-        //error?
+        perror("error reading from socket");
     }
     else {
+        // cout <<"the client sent: " << buffer << endl;
+        // int len = sizeof(buffer) / sizeof(buffer[0]);
+        // for(int i = 0; i < len; i++){
+        //     buffer[i] = toupper(buffer[i]);
+        // }
+
         // get parameters from client buffer
         int flag = 0;
+        int k;
+        string dist = "";
+        string pred = "";
+        vector<double> test;
         try {
             vector<string> tokens;
             char* token = strtok(buffer, " ");
@@ -58,30 +68,31 @@ int main(int argc, char *argv[]) {
                 tokens.push_back(s);
                 token = strtok(NULL, " ");
             }
-            int k = atoi(tokens[tokens.size() - 1])
-            string dist = str(tokens[tokens.size() - 2]);
-            vector<double> test;
-            for(i = 0; i < tokens.size() - 2; i++) {
-                double v = atof(tokens[i]);
+            k = stoi(tokens[tokens.size() - 1]);
+            dist = (tokens[tokens.size() - 2]);
+            for(int i = 0; i < tokens.size() - 2; i++) {
+                double v = stof(tokens[i]);
                 test.push_back(v);
             }
                 } catch (...) {
-                    char buffer[] = "invalid input ";
+                    perror("invalid input");
                     flag = 1;
                     }
         // knn
         if (flag == 0){
             KNNClassifier model(k, file, dist);
-            string pred;
             if (model.getSampleSize() == test.size()) {
                 pred = model.predict(test);
-                if (pred != NULL) {
-                    char buffer[pred.size()];
+                if (!pred.empty()) {
                     for (int i = 0; i < pred.size(); i++){
                         buffer[i] = pred[i];
                     }
                     buffer[pred.size()] = '\0';
-                }  
+                } else {
+                    perror("no prediction");
+                } 
+            } else {
+                perror("test vector invalid size");
             }
         }
     }
