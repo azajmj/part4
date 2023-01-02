@@ -19,7 +19,7 @@
 
 using namespace std;
 
-KNNClassifier::KNNClassifier(int neighbors,string datasetName, string distance){
+KNNClassifier::KNNClassifier(int neighbors, string datasetName, string distance){
     k = neighbors;
     metric = initDistance(distance);
     dataTrain = fit(datasetName);
@@ -167,7 +167,7 @@ string KNNClassifier::predict(vector<double>& test) {
 
 
 
-Distance *KNNClassifier::initDistance(string distance){
+Distance *KNNClassifier::initDistance(string distance) {
     if (distance == "EUC") {
       return new Euc();
     }
