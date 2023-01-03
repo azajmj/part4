@@ -76,24 +76,28 @@ int main(int argc, char *argv[]) {
                     test.push_back(v);
                 }
                     } catch (...) {
-                        perror("invalid input");
+                        strncpy(buffer, "invalid input", sizeof(buffer));
                         flag = 1;
                         }
             // knn
             if (flag == 0){
-                KNNClassifier model(k, file, dist);
-                if (model.getSampleSize() == test.size()) {
-                    pred = model.predict(test);
-                    if (!pred.empty()) {
-                        for (int i = 0; i < pred.size(); i++){
-                            buffer[i] = pred[i];
-                        }
-                        buffer[pred.size()] = '\0';
+                try {
+                    KNNClassifier model(k, file, dist);
+                    if (model.getSampleSize() == test.size()) {
+                        pred = model.predict(test);
+                        if (!pred.empty()) {
+                            for (int i = 0; i < pred.size(); i++){
+                                buffer[i] = pred[i];
+                            }
+                            buffer[pred.size()] = '\0';
+                        } else {
+                            strncpy(buffer, "no prediction", sizeof(buffer));
+                        } 
                     } else {
-                        perror("no prediction");
-                    } 
-                } else {
-                    perror("test vector invalid size");
+                        strncpy(buffer, "invalid input", sizeof(buffer));
+                    }
+                } catch (...) {
+                    strncpy(buffer, "invalid input", sizeof(buffer));
                 }
             }
         }
