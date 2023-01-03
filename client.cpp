@@ -75,15 +75,15 @@ int main(int argc, char *argv[]) {
                 numbers.push_back(val);
             }
             catch (exception &e) {
-                //todo - check if the token is one of the dist function:
-                // if token == "AUC" || token =="MIN..
-                dist = token;
-//               // else {
-//                    cout << "invalid input" << endl;
-//                    flag = 1;
-//                    break;
-//                }
-
+                //making sure token is one of the distances
+                if (token == "AUC" || token == "MIN" || token == "MAN" || token == "CAN" || token == "CHB") {
+                    dist = token;
+                } 
+                else {
+                    cout << "invalid input" << endl;
+                    flag = 1;
+                    break;
+                }
                 // after we took the dist, the stream string contain only the k value.
                 // so now we can just take the last value and save him in k variable.
                 getline(stream_str, token, ' ');
