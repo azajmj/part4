@@ -55,21 +55,11 @@ compiling:
 
 - type 'make'
 
+This will create the server.out and client.out executables using the Makefile provided in the project, start the server listening on the specified port, and run the client to connect to the server and send unclassified vectors for classification. 
+
 running:
 
-- type './a.out k file distance'
+- type 'ADD WHAT TO DO HERE'
 
-Where:
+Once the code is running, you can enter a vector of data points and then press enter to get the predicted class, as instructed above under client.
 
-k: number of nearest neighbors to use. Must be a positive integer
-file: name of the tagged vector file, file containing the training dataset. Can be a relative or full address
-distance: distance metric to use.
-Euclidean - AUC,
-Manhattan - MAN,
-Chebyshev - CHB,
-Canberra - CAN,
-Minkowski - MIN
-if MIN (Minkowski) distance was chosen, you will be prompted to enter a p value
-Once the code is running, you can enter a vector of data points and then press enter to get the predicted class. The input must be a vector of real numbers, separated by spaces. When you are done entering data vectors to be classified, type '-1' to exit the program.
-
-This will create the server.out and client.out executables using the Makefile provided in the project, start the server listening on the specified port, and run the client to connect to the server and send unclassified vectors for classification. The server will keep listening until you type -1 to exit the program.
