@@ -44,12 +44,12 @@ int main(int argc, char *argv[]) {
         }
         struct sockaddr_in client_sin;
         unsigned int addr_len = sizeof(client_sin);
-
-            int client_sock = accept(sock, (struct sockaddr *) &client_sin, &addr_len);
-            if (client_sock < 0) {
-                perror("error accepting client");
-            }
-       while (true) {
+    while(true) {
+        int client_sock = accept(sock, (struct sockaddr *) &client_sin, &addr_len);
+        if (client_sock < 0) {
+            perror("error accepting client");
+        }
+        while (true) {
             char buffer[4096];
             int expected_data_len = sizeof(buffer);
             int read_bytes = recv(client_sock, buffer, expected_data_len, 0);
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
                 perror("error reading from socket");
             } else {
 
-                cout << buffer <<endl;
+                //cout << buffer << endl;
 
                 // Deserialize the data
                 stringstream deserialized_data(buffer);
@@ -67,6 +67,11 @@ int main(int argc, char *argv[]) {
                 vector<double> vec;
                 string pred = "";
                 deserialized_data >> vector_size;
+                //move to the next client
+                if (vector_size == -1) {
+                    close(client_sock);
+                    break;
+                }
                 for (int i = 0; i < vector_size; i++) {
                     double number;
                     deserialized_data >> number;
@@ -102,12 +107,14 @@ int main(int argc, char *argv[]) {
                 perror("error sending to client");
             }
         }
+    }
         close(sock);
     }
     catch (const exception &e) {
         cerr << e.what() << endl;
         return 1;
     }
+
 
     return 0;
 }
