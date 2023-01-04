@@ -47,8 +47,6 @@ compiling:
 
 - open Terminal
 
-- type 'git init'
-
 - type 'git clone https://github.com/itaialcalai/part3.git'
 
 - type 'cd part3'
