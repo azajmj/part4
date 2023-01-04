@@ -66,3 +66,5 @@ for running the client:
 Once the code is client is running, you can enter a vector of data points, distance metric by the three letter code, and value k for the knn classifier, then press enter to get the predicted class from the server, as instructed above under client.
 - type '-1' to terminate the client
 
+- when selecting mink distance metric the server will be prompt to enter p value
+
