@@ -71,13 +71,11 @@ int main(int argc, char *argv[]) {
             // "input looks something like =  "1 2 3 4 AUC 1"
             istringstream stream_str(input); //keeps string in input stringstream
             if (input == "-1") {
-
                 string  message = "-1";
                 if (send(sock, message.c_str(), message.size(), 0) < 0) {
                     cout << "Error sending message " << endl;
                     return -1;
                 }
-
                 close(sock);
                 return 0;
             }
@@ -159,11 +157,14 @@ int main(int argc, char *argv[]) {
                 cout<< buffer[index];
                 index++;
             }
+            cout << endl;
         }
     }
     catch (const exception &e) {
         cerr << e.what() << endl;
+
         return 1;
     }
+
     return 0;
 }
