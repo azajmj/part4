@@ -77,6 +77,7 @@ int main(int argc, char *argv[]) {
                     deserialized_data >> number;
                     vec.push_back(number);
                 }
+
                 string dist;
                 int k;
                 deserialized_data >> dist;
@@ -88,17 +89,22 @@ int main(int argc, char *argv[]) {
                         pred = model.predict(vec);
                         if (!pred.empty()) {
                             for (int i = 0; i < pred.size(); i++) {
+
                                 buffer[i] = pred[i];
                             }
                             buffer[pred.size()] = '\0';
                         } else {
                             strncpy(buffer, "no prediction", sizeof(buffer));
+
                         }
+
                     } else {
                         strncpy(buffer, "invalid input", sizeof(buffer));
                     }
                 } catch (...) {
-                    strncpy(buffer, "invalid input123", sizeof(buffer));
+
+                    strncpy(buffer, "invalid input", sizeof(buffer));
+n
                 }
             }
             //cout << buffer << endl;
