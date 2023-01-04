@@ -158,6 +158,7 @@ int main(int argc, char *argv[]) {
                 index++;
             }
             cout << endl;
+            memset(buffer, 0, sizeof(buffer));
         }
     }
     catch (const exception &e) {
