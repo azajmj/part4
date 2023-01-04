@@ -51,7 +51,7 @@ compiling:
 
 - type 'git clone https://github.com/itaialcalai/part3.git'
 
-- type 'cd knn'
+- type 'cd part3'
 
 - type 'make'
 
@@ -59,7 +59,12 @@ This will create the server.out and client.out executables using the Makefile pr
 
 running:
 
-- type 'ADD WHAT TO DO HERE'
+for running the server:
+- type './server.out <file> <port>'
+and the server will run indf
 
-Once the code is running, you can enter a vector of data points and then press enter to get the predicted class, as instructed above under client.
+for running the client:
+- type './client.out <ip> <port>'
+Once the code is client is running, you can enter a vector of data points, distance metric by the three letter code, and value k for the knn classifier, then press enter to get the predicted class from the server, as instructed above under client.
+- type '-1' to terminate the client
 
