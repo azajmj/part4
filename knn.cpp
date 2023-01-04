@@ -168,7 +168,7 @@ string KNNClassifier::predict(vector<double>& test) {
 
 
 Distance *KNNClassifier::initDistance(string distance) {
-    if (distance == "EUC") {
+    if (distance == "AUC") {
       return new Euc();
     }
     if (distance == "MAN") {
