@@ -104,7 +104,6 @@ int main(int argc, char *argv[]) {
                 } catch (...) {
 
                     strncpy(buffer, "invalid input", sizeof(buffer));
-n
                 }
             }
             //cout << buffer << endl;
