@@ -86,15 +86,19 @@ int main(int argc, char *argv[]) {
                 // Perform KNN classification:
                 try {
                     KNNClassifier model(k, file, dist);
-                    if (model.getSampleSize() == vec.size()) {
-                        pred = model.predict(vec);
-                        if (!pred.empty()) {
-                            for (int i = 0; i < pred.size(); i++) {
-                                buffer[i] = pred[i];
+                    if (model.getTrainSize() > k) {
+                        if (model.getSampleSize() == vec.size()) {
+                            pred = model.predict(vec);
+                            if (!pred.empty()) {
+                                for (int i = 0; i < pred.size(); i++) {
+                                    buffer[i] = pred[i];
+                                }
+                                buffer[pred.size()] = '\0';
+                            } else {
+                                strncpy(buffer, "no prediction", sizeof(buffer));
                             }
-                            buffer[pred.size()] = '\0';
                         } else {
-                            strncpy(buffer, "no prediction", sizeof(buffer));
+                            strncpy(buffer, "invalid input", sizeof(buffer));
                         }
                     } else {
                         strncpy(buffer, "invalid input", sizeof(buffer));
