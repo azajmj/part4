@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
                         strncpy(buffer, "invalid input", sizeof(buffer));
                     }
                 } catch (...) {
-                    strncpy(buffer, "invalid input123", sizeof(buffer));
+                    strncpy(buffer, "invalid input", sizeof(buffer));
                 }
             }
             //cout << buffer << endl;
