@@ -6,7 +6,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -30,10 +29,9 @@ int main(int argc, char *argv[]) {
 
         int sock = socket(AF_INET, SOCK_STREAM, 0);
         if (sock < 0) {
-            cout << "Error creating socket" << endl;
+            //cout << "Error creating socket" << endl;
             return -1;
         }
-
         //Connect to the server:
         // define all the details:
         // what is the port of the server?
@@ -56,7 +54,7 @@ int main(int argc, char *argv[]) {
         //              sockaddr_in addr;
         //              sockaddr y = (sockaddr)addr;
         if (connect(sock, (sockaddr *) &addr, sizeof(addr)) < 0) {
-            cout << "Error connecting to the server" << endl;
+            //cout << "Error connecting to the server" << endl;
             return -1;
         }
 
@@ -67,13 +65,14 @@ int main(int argc, char *argv[]) {
             int k;
             //cout << "Enter your data" << endl;
             string input;
+            int validationCounter = 0;
             getline(cin, input);
             // "input looks something like =  "1 2 3 4 AUC 1"
             istringstream stream_str(input); //keeps string in input stringstream
             if (input == "-1") {
                 string  message = "-1";
                 if (send(sock, message.c_str(), message.size(), 0) < 0) {
-                    cout << "Error sending message " << endl;
+                    //cout << "Error sending message " << endl;
                     return -1;
                 }
                 close(sock);
@@ -94,8 +93,8 @@ int main(int argc, char *argv[]) {
                     //making sure token is one of the distances
                     if (token == "AUC" || token == "MIN" || token == "MAN" || token == "CAN" || token == "CHB") {
                         dist = token;
+                        validationCounter++;
                     } else {
-                        cout << "invalid input" << endl;
                         flag = 1;
                         break;
                     }
@@ -105,14 +104,19 @@ int main(int argc, char *argv[]) {
                     getline(stream_str, token, ' ');
                     try {
                         k = stoi(token);
+                        validationCounter++;
                         break;
                     }
                     catch (exception &e) {
-                        cout << "invalid input" << endl;
                         flag = 1;
                         break;
                     }
                 }
+            }
+
+            if (validationCounter != 2){
+                cout <<"invalid input" << endl;
+                continue;
             }
 
             //checking vector input
@@ -121,6 +125,7 @@ int main(int argc, char *argv[]) {
                 continue;
             }
             if (flag == 1) {
+                cout << "invalid input" << endl;
                 continue; //invalid input, new iteration
             }
             // we want to do Serialization to our input in order to send it to the server:
@@ -137,17 +142,17 @@ int main(int argc, char *argv[]) {
 
             // c_str() convert the string from string to const char*, as needed in send function.
             if (send(sock, message.c_str(), message.size(), 0) < 0) {
-                cout << "Error sending message " << endl;
+                //cout << "Error sending message " << endl;
                 return -1;
             }
             //Read the Response from the server:
             // create a buffer (char array in size of 1024 bits) to save the server response.
-            char buffer[1024];
+            char buffer[4096];
             // we will use the recv function:
             // the data we received will save in the buffer, and the return value is the size.
-            int bytesReceived = recv(sock, buffer, 1024, 0);
+            int bytesReceived = recv(sock, buffer, 4096, 0);
             if (bytesReceived < 0) {
-                cout << "Error receiving message from server " << endl;
+                //cout << "Error receiving message from server " << endl;
                 return -1;
             }
             //cout << "Response from server: ";
