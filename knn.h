@@ -15,6 +15,9 @@ class KNNClassifier
         pair<vector<vector<double>>,vector<string>> fit(string datasetName); // gets a pointer to a files path - reads line by line and initialize it to list of vector vectors(4d) xTrain, and vectors of string lables
         string predict(vector<double>& test); //calls getNeighbors and getLabel, returns prediction
         int getSampleSize();
+        int getTrainSize();
+    
+    
 
     private: 
         vector< pair <double, string> > getNeighbors(vector<double>& test); //creates vector of neighbors by pair - dist fro meach xTrain to test and the corespanding label (by index)
