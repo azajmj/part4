@@ -195,6 +195,11 @@ int KNNClassifier::getSampleSize() {
     return this->samplesSize;
 }
 
+int KNNClassifier::getTrainSize() {
+    int trainSize = dataTrain.first.size();
+    return trainSize;
+}
+
 
 
     
