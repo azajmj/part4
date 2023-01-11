@@ -1,15 +1,15 @@
 #include <thread>
 #include <vector>
 #include <atomic>
+#include "DefaultIO.h"
 class Server {
     public:
         Server(int port);
         ~Server();
         void start();
-        void stop();
-        void handleClient(int client_socket, CLI &cli);
+        void handleClient(DefaultIO* dio, int client_sock);
     private:
         vector<thread> threads;
         atomic<bool> running;
-        int socket;
-}
+        int port;
+};

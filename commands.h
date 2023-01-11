@@ -69,6 +69,7 @@ public:
     }
 };
 
+
 class UploadCsv:public Command{
 public:
     UploadCsv(DefaultIO* dio, CommonData* commonData);
@@ -94,7 +95,12 @@ public:
     virtual void execute();
 };
 
-// todo - need to write command for option 5..
+class LoadResults:public Command{
+public:
+    LoadResults(DefaultIO* dio, CommonData* commonData);
+
+    virtual void execute();
+};
 
 class Exit:public Command{
 public:

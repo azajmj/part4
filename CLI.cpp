@@ -8,21 +8,25 @@ using namespace std;
 CLI::CLI(DefaultIO* dio) {
     this->dio = dio;
     // auto commonData = make_shared<CommonData>();
-    CommonData* commonData = new CommonData();
+    this->commonData = new CommonData();
     // probably need to do commonData->KNN = NEW KNN...
     this->commands.push_back(new UploadCsv(dio,commonData));
     this->commands.push_back(new AlgSettings(dio,commonData));
     this->commands.push_back(new Classify(dio,commonData));
     this->commands.push_back(new Results(dio,commonData));
-    // NEED TO ADD THE COMMAND OF OPTION NUMBER 5 THAT I DIDNT DEFINED..
+    this->commands.push_back(new LoadResults(dio, commonData));
     this->commands.push_back(new Exit(dio,commonData));
 }
+
 CLI::~CLI() {
-    delete dio;
-    size_t size = commands.size();
-    for (size_t i = 0; i < size; i++){
-        delete commands[i];
+    delete commonData;
+    for (Command* command : commands) {
+        delete command;
     }
+    // size_t size = commands.size();
+    // for (size_t i = 0; i < size; i++){
+    //     delete commands[i];
+    // }
 }
 
 //after adding 5th command change every 5 to 6
@@ -64,4 +68,5 @@ void CLI::start(){
 
         }
     }
+    return;
 }

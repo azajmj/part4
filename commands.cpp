@@ -163,6 +163,42 @@ void Results::execute(){
         return;
     }
     int size = commonData->predictions.first.size(); // = knn.size() ... get the CSV size that you loaded.
+    // stringstream ss;
+    for(int i = 0; i < size; i++){
+        vector<string> xTest = commonData->predictions.first[i];
+        string label = commonData->predictions.second[i];
+        int sampleSize = xTest.size();
+        stringstream ss;
+        for(int j = 0; j < sampleSize; j++) {
+            ss << xTest[j];
+            if (j < sampleSize - 1) {
+                ss << ' ';
+            }
+        }
+        //print the file as they asked in the ass.
+        ss << '\t';
+        ss << label;
+        ss << '\n';
+        this->dio->write(ss.str());
+    }
+    this->dio->write("Done.\n");
+    return;
+}
+
+LoadResults::LoadResults(DefaultIO* dio, CommonData* commonData):Command(dio,commonData,"download results"){}
+void LoadResults::execute(){
+    if (!commonData->isFileUploaded)
+    {
+        dio->write("please upload data\n");
+        return;
+    }
+    if (!commonData->isFileClassified)
+    {
+        dio->write("please classify the data\n");
+        return;
+    }
+    int size = commonData->predictions.first.size(); // = knn.size() ... get the CSV size that you loaded.
+    // stringstream ss;
     for(int i = 0; i < size; i++){
         vector<string> xTest = commonData->predictions.first[i];
         string label = commonData->predictions.second[i];
@@ -185,12 +221,9 @@ void Results::execute(){
 }
 
 
-// todo - need to write command for option 5..
-
 
 Exit::Exit(DefaultIO* dio, CommonData* commonData):Command(dio,commonData,"exit"){}
 void Exit::execute(){
-    delete commonData;
     return;
 }
 

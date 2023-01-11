@@ -20,26 +20,12 @@ public:
     virtual void write(string text);
 };
 
-// class socketIO : public DefaultIO{
-//     int clientID;
-// public:
-//     socketIO(int clientid){
-//         this->clientID = clientid;
-//     }
+class SocketIO : public DefaultIO{
+    int socketID;
+public:
+    SocketIO(int clientid);
 
-//     virtual string read(){
-//         string str = "";
-//         char ch = 0;
-//         ::read(clientID, &ch, sizeof(char));
-//         while (ch != '\n') {
-//             str += ch;
-//             ::read(clientID, &ch, sizeof(char));
-//         }
-//         return str;
+    virtual string read();
 
-//     }
-
-//     virtual void write(string text){
-//         ::write(clientID, text.c_str(), text.length());
-//     }
-// };
+    virtual void write(string text);
+};

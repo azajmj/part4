@@ -2,8 +2,7 @@
 // Created by Lenovo on 10/01/2023.
 //
 
-#ifndef COMMAND_PATTERN_CLI_H
-#define COMMAND_PATTERN_CLI_H
+
 #pragma once
 #include <string.h>
 //#include KNN..
@@ -17,6 +16,7 @@ class CLI {
     // need to make a field of the KNN, probably..
     DefaultIO* dio;
     // you can add data members
+    CommonData* commonData;
 public:
     CLI(DefaultIO* dio);
     void start();
@@ -24,4 +24,3 @@ public:
 };
 
 
-#endif //COMMAND_PATTERN_CLI_H
