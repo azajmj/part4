@@ -9,10 +9,14 @@
 #include <vector>
 #include <cctype>
 #include "knn.h"
+#include "server.h"
 #include <sstream>
 // #include <cstudio>
 #define MAX_MSG 100
-
+void Server::start() {
+    running = true;
+    while(running)
+}
 int main(int argc, char *argv[]) {
     try {
         // Check that there are exactly 2 arguments

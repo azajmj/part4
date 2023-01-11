@@ -1,21 +1,32 @@
-TARGETS = server.out client.out
-server_OBJS = distance.o knn.o server.o
-client_OBJS = distance.o knn.o client.o
-SOURCES = distance.cpp knn.cpp server.cpp client.cpp
-HEADERS = distance.h euc.h man.h cheb.h can.h mink.h knn.h
-CC = g++
-FLAGS = -g -c -Wall
+OBJS	= distance.o knn.o CLI.o commands.o defaultIO.o main.o
+SOURCE	= distance.cpp knn.cpp CLI.cpp commands.cpp defaultIO.cpp main.cpp
+HEADER	= distance.h euc.h man.h cheb.h can.h mink.h knn.h CLI.h commands.h defaultIO.h
+OUT	= out
+CC	 = g++
+FLAGS	 = -g -c -Wall
+LFLAGS	 = 
 
-all: $(TARGETS)
+all: $(OBJS)
+	$(CC) -g $(OBJS) -o $(OUT) $(LFLAGS)
 
-server.out: $(server_OBJS)
-	$(CC) -o $@ $^
+distance.o: distance.cpp
+	$(CC) $(FLAGS) distance.cpp -std=c++17
 
-client.out: $(client_OBJS)
-	$(CC) -o $@ $^
+knn.o: knn.cpp
+	$(CC) $(FLAGS) knn.cpp -std=c++17
 
-%.o: %.cpp $(HEADERS)
-	$(CC) $(FLAGS) -o $@ $<
+CLI.o: CLI.cpp
+	$(CC) $(FLAGS) CLI.cpp -std=c++17
+
+commands.o: commands.cpp
+	$(CC) $(FLAGS) commands.cpp -std=c++17
+
+defaultIO.o: defaultIO.cpp
+	$(CC) $(FLAGS) defaultIO.cpp -std=c++17
+
+main.o: main.cpp
+	$(CC) $(FLAGS) main.cpp -std=c++17
+
 
 clean:
-	rm -f *.o $(TARGETS)
+	rm -f $(OBJS) $(OUT)

@@ -4,7 +4,7 @@
 
 #ifndef COMMAND_PATTERN_CLI_H
 #define COMMAND_PATTERN_CLI_H
-
+#pragma once
 #include <string.h>
 //#include KNN..
 #include "commands.h"
