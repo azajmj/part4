@@ -3,6 +3,7 @@
 //
 
 #include "CLI.h"
+#include <sstream>
 using namespace std;
 
 CLI::CLI(DefaultIO* dio) {
@@ -14,7 +15,7 @@ CLI::CLI(DefaultIO* dio) {
     this->commands.push_back(new AlgSettings(dio,commonData));
     this->commands.push_back(new Classify(dio,commonData));
     this->commands.push_back(new Results(dio,commonData));
-    this->commands.push_back(new LoadResults(dio, commonData));
+    this->commands.push_back(new loadResults(dio, commonData));
     this->commands.push_back(new Exit(dio,commonData));
 }
 
@@ -36,27 +37,41 @@ void CLI::start(){
     float option = -1;
     string commandStr;
     bool isRunning = true;
+    cout <<"Server Running...\n";
     while(isRunning){
-        this->dio->write("Welcome to the KNN Classifier Server. Please choose an option:\n");
+        // cout <<"printing menue\n";
+        stringstream ss;
+        ss << "Welcome to the KNN Classifier Server. Please choose an option:\n";
+        // this->dio->write("Welcome to the KNN Classifier Server. Please choose an option:\n");
         for (size_t i = 0; i < size; i++){
             int index = i+1;
-            if (index == 5) {
+            if (index == 6) {
                 index = 8;
             }
-            this->dio->write(to_string(index));
-            this->dio->write(". ");
-            this->dio->write(commands[i]->description+"\n");
+            ss << to_string(index) << ". " << commands[i]->description+"\n";
+            // this->dio->write(to_string(index));
+            // this->dio->write(". ");
+            // this->dio->write(commands[i]->description+"\n");
         }
+        this->dio->write(ss.str());
         commandStr = this->dio->read();
         try {
             option = stoi(commandStr);
-            if ((option >= 1 && option < 5) || option == 8 ){
+            cout << "got option " << option << endl;
+            if ((option >= 1 && option <= 5) || option == 8 ){
                 if (option == 8) {
-                    option = 5;
+                    cout << "server in 8\n";
+                    option = 6;
                     this->commands[option-1]->execute();
+                    cout << "terminating client..\n";
                     isRunning = false;
                 }
+                // cout << "going to exe " << option << endl;
                 this->commands[option-1]->execute();
+                if (option == 5) {
+                    cout << "\n";
+                }
+                // cout << "returned from command"<< option <<"\n";
 
             }
             else {
@@ -67,6 +82,9 @@ void CLI::start(){
         catch (const invalid_argument&){
 
         }
+        // cout << "send $$$\n";
+        // this->dio->write("$$$");
     }
+    cout << "client off...\n";
     return;
 }

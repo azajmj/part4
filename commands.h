@@ -5,6 +5,7 @@
 #include<iostream>
 #include <string.h>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <math.h>
 #include <sys/socket.h>
@@ -27,7 +28,7 @@ struct CommonData {
     string test_path;
     string metric;
     KNNClassifier* knn;
-    pair<vector<vector<string>>, vector<string>> predictions;
+    pair<vector<string>, vector<string>> predictions;
     //todo - probably need to have more fields, like KNN object for the train and KNN object for test.
     CommonData(): isFileUploaded(false),isFileClassified(false),k(5),metric("AUC"),knn(),predictions(){}
 };
@@ -43,29 +44,54 @@ public:
     virtual void execute()=0;
     virtual ~Command(){}
     virtual void fileUpload(string name){
-        // this function will load the classifier CSV, you can change it according to what you did in your
-        // previous ass.. this is just in general way..
-        try{
+        try {
             ofstream file(name);
             string line;
-
-            do
-            {
-                line = this->dio->read();
-                // assume the file end with "done", change this according to your files..
+            string content;
+            content = this->dio->read();
+            // cout << "iserver got:::::" << content << endl;
+            istringstream ss(content);
+            // ss.str(ss.str() + "\n" + "done$\n");
+            // ss << "done$" << endl;
+            do {
+                getline(ss, line, '\n');
                 if(line != "done$"){
+                    // cout << "inserver lineis77 " << line << endl;
                     file << line << endl;
-                }
+                } 
             } while (line != "done$");
-            
             this->dio->write("Upload complete.\n");
             return;
-            // // close the file
-            // if(file.is_open())
-            //     file.close();
         } catch (...) {
+            cout << "error uploading file in server\n";
             this->dio->write("invalid input");
         }
+
+        // this function will load the classifier CSV, you can change it according to what you did in your
+        // previous ass.. this is just in general way..
+
+        // try{
+        //     ofstream file(name);
+        //     string line;
+        //     do
+        //     {
+        //         line = this->dio->read();
+        //         cout << "recieved! " << line;
+        //         // assume the file end with "done", change this according to your files..
+        //         if(line != "done$"){
+        //             file << line << endl;
+        //         }
+        //     } while (line != "done$");
+            
+        //     this->dio->write("Upload complete.\n");
+        //     return;
+        //     // // close the file
+        //     // if(file.is_open())
+        //     //     file.close();
+        // } catch (...) {
+        //     cout << "errror\n";
+        //     this->dio->write("invalid input");
+        // }
     }
 };
 
@@ -95,9 +121,9 @@ public:
     virtual void execute();
 };
 
-class LoadResults:public Command{
+class loadResults:public Command{
 public:
-    LoadResults(DefaultIO* dio, CommonData* commonData);
+    loadResults(DefaultIO* dio, CommonData* commonData);
 
     virtual void execute();
 };

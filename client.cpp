@@ -8,6 +8,8 @@
 #include "defaultIO.h"
 #include "Client.h"
 #include <thread>
+#include <pthread.h>
+#include <functional>
 
 using namespace std;
 
@@ -19,48 +21,83 @@ Client::~Client() {
     delete dio;
 }
 
-void Client::uploadfile(DefaultIO* dio, string file_path) {
+string Client::uploadfile(DefaultIO* dio, string file_path) {
+    // cout << "in upload";
     fstream file(file_path, ios::in);
-    string response;
+    // string response;
+    stringstream ss;
     //open the file and check if opening the file worked.
     if (file.is_open())
     {
-    string line;
-    // start read the file content.
-    // as long as we have lines to read - read.
-    try {
-    while(getline(file,line)) {
-        this->dio->write(line);
-    }
-    this->dio->write("done$");
-    } catch (...) {
-    // print an error.
-    cout << "invalid file path\n";
-    }
+        string line;
+        // start read the file content.
+        // as long as we have lines to read - read.
+        try {
+            // getline(file, line);
+            // this->dio->write(line);
+            // string check;
+            int flag = 0;
+            while(getline(file, line)) {
+                // cout << "writing to server lines: " << line << endl;
+                ss << line << endl;;
+                if (flag == 120) {
+                    break;
+                    // break;
+                }
+                // dio->write(line);
+                // check = this->dio->read();
+                // if (check != "RFNL$"){
+                //     break;
+                // }
+                flag++;
+            }
+            
+            ss << "done$" << endl;
+            
+            
+            // dio->write("done$");
+            // cout << "SS IS: " << ss.str();
+        } catch (...) {
+        // print an error.
+        cout << "invalid file path\n";
+        }
     }
     if(file.is_open()){
     file.close();
     }
-    response = this->dio->read();
-    cout << response;
-    return;
+    return ss.str();
+    // response = this->dio->read();
+    // cout << response;
+    // return;
 }
 
-void Client::downloadfile(DefaultIO* dio, string file_path) {
+void Client::downloadfile(DefaultIO* dio, string file_path, string content) {
 
     //split to thread here?
     try{
+        // cout <<"IN HERE\n";
         ofstream file(file_path);
+        // string content;
+        // content = dio->read();
+        // cout << "got path " << file_path << "got content " << content << endl;
+        if (content == "please upload data\n" || content == "please classify the data\n") {
+            cout << content << endl;
+            return;
+        }
+        // assume the file end with "done", change this according to your files..
+        istringstream ss(content);
         string line;
-
-        do
-        {
-            line = dio->read();
-            // assume the file end with "done", change this according to your files..
-            if(line != "done.\n"){
+        do {
+            // cout << "in the loooooooooop line " << line << " ";
+            getline(ss, line, '\n');
+            if(line != "Done."){
                 file << line << endl;
+            } else {
+                // cout << "OMGGG\n";
+                break;
             }
-        } while (line != "done.\n");
+        } while(line != "Done.");
+    
         if(file.is_open()){
             file.close();
         }
@@ -69,8 +106,82 @@ void Client::downloadfile(DefaultIO* dio, string file_path) {
     }
     // close the file
     //end thread?
+    // cout << "Download complete\n";
     return;
 }
+// void Client::getTitle(DefaultIO* io) {
+//     while(true) {
+//         string server_message;
+//         server_message = dio->read();
+//         if (server_message == "done$") {
+//             return;
+//         }
+//         cout << server_message << endl;
+//     }
+// }
+// void Client::choiceOne(DefaultIO* io, string user_input) {
+//     dio->write(user_input);
+//     int flag = 0;
+//     string server_message;
+//     while(flag != 2) {
+//         server_message = dio->read();
+//         if(server_message == "$$$") {
+//             return;
+//         }
+//         cout << server_message;
+//         getline(cin, user_input);
+//         this->uploadfile(dio, user_input);
+//         flag += 1;
+//     }
+//     return;
+// }
+// void Client::choiceTwo(DefaultIO* io, string user_input) {
+//     dio->write(user_input);
+//     string server_message;
+//     while(true) {
+//         server_message = dio->read();
+//         if(server_message == "$$$") {
+//             return;
+//         }
+//         cout << server_message;
+//         getline(cin, user_input);
+//         dio->write(user_input);
+//     }
+// }
+
+// void Client::choiceFive(DefaultIO* io) {
+//     dio->write(user_input);
+//     thread t(&Client::downloadfile, this, dio, user_input);
+//     while(true) {
+//         thread t(&Client::downloadfile, this, dio, user_input);
+//         server_message = dio->read();
+//         if(server_message == "$$$") {
+//             return;
+//         }
+//         cout << server_message;
+//         getline(cin, user_input);
+//         this->uploadfile(dio, user_input);
+//         flag += 1;
+//     }
+// }
+bool Client::validChoice(string m) {
+    try {
+        int n = stoi(m);
+        if ((n >= 1 && n <=5) || n == 8) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (...) {
+        return false;
+    }
+    
+}
+// void* Client::downloadWrapper(void* args) {
+//     auto& client = *static_cast<Client*>(args);
+//     client.downloadfile(dio, file_path, content);
+//     return NULL;
+// }
 
 void Client::start() {
     try {
@@ -93,47 +204,211 @@ void Client::start() {
         }
         DefaultIO* dio = new SocketIO(sock);
         while(true) {
-            string server_message;
+            // cout<< "ready to get menu\n";
+            string server_message = "";
+            string user_input = "";
             thread t;
-            int choice;
-            string user_input;
+            // int choice;
+            // this->getTitle(dio);
             server_message = dio->read();
+            // if (server_message == "$$$") {
+            //     server_message = dio->read();
+            // }
             cout << server_message << endl;
-            getline(cin, user_input);
-            choice = stoi(user_input);
-            if (choice == 1) {
+            while (true) {
+                getline(cin, user_input);
+                if (this->validChoice(user_input)){
+                    break;
+                }
+                cout << "invalid option\n";
+            }
+            // choice = stoi(user_input);
+            // dio->write(user_input);
+            // cout << "got choice" << choice << endl;
+            // cout << "requesting to execute " << user_input << endl;
+            if (user_input == "1") {
                 dio->write(user_input);
                 int flag = 0;
+                // string server_message;
                 while(flag != 2) {
+                    string content;
                     server_message = dio->read();
-                    cout << server_message;
+                    cout << server_message << endl;;
                     getline(cin, user_input);
                     this->uploadfile(dio, user_input);
-                    flag += 1;
-                }
-            }
-            if (choice == 2 || choice == 3 ){
-                dio->write(user_input);
-            }
-            if (choice == 4) {
-                dio->write(user_input);
-                while (server_message != "Done.") {
+                    content = this->uploadfile(dio, user_input);
+
+                    dio->write(content);
+              
+                    // dio->write(content);
                     server_message = dio->read();
-                    cout << server_message<< endl;
+                    cout << server_message << endl;;
+                    // cout << "got back from uplaod";
+                    flag += 1;
+                    server_message = "";
+                    user_input = "";
                 }
+                server_message = "";
+                user_input = "";
             }
-            if (choice == 5) {
+            // || user_input == "3" || user_input == "4"){
+            else if (user_input == "2") { 
                 dio->write(user_input);
-                //lock thread?
-                thread t(&Client::downloadfile, this, dio, user_input);
-                //unlock thread?
+                // while(server_message != "$$$") {
+                server_message = dio->read();
+                cout << server_message << endl;;
+                getline(cin, user_input);
+                if(user_input.empty()) {
+                    dio->write(" ");
+                    // break;
+                }
+                else {
+                    dio->write(user_input);
+                    server_message = dio->read();
+                    if(server_message != "$$$") {
+                        cout << server_message << endl;;
+                        
+                }
+                server_message = "";
+                user_input = "";
+                }
+
+                // if(server_message == "$$$") {
+                //     break;
+                // }
+                // if(server_message == "invalid value for metric\n" || server_message == "invalid value for k\n" || server_message == "invalid value for k\ninvalid value for metric") {
+                //     cout << server_message;
+                //     break;
+                // }
+                // cout << server_message;
+                // getline(cin, user_input);
+                // if(user_input.empty()) {
+                //     dio->write(" ");
+                //     break;
+                // }
+                // dio->write(user_input);
+                // // }
             }
-            if (choice >= 6) {
-                this->dio->write(user_input);
-                t.join();
+            else if (user_input == "3") {
+                dio->write(user_input);
+                // string server_message;
+                server_message = dio->read();
+                cout << server_message << endl;;
+                server_message = "";
+                user_input = "";
+            }
+            else if (user_input == "4") {
+                dio->write(user_input);
+                // string server_message;
+                server_message = dio->read();
+                // cout << server_message;
+                // server_message = dio->read();
+                cout << server_message << endl;
+                // if (server_message != "please upload data\n" && server_message != "please classify the data\n") {
+                //     cout << server_message;
+                //     // do {
+                //     //     // cout <<"IN\n";
+                //     //     cout << server_message;
+                //     //     server_message = "";
+                //     //     server_message = dio->read();
+                //     //     // string one;
+                //     //     // // getline(cin, one);
+                //     //     // // if (one == "8") {
+                //     //     // //     break;
+                //     //     // // }
+                //     // } while (server_message != "Done.\n");
+                //     // cout << "OUT\n";
+                // }
+                //  else {
+                //     cout << server_message;
+                //     cout << "OMG";
+                // }
+                server_message = "";
+                user_input = "";
+            }
+            //     dio->write(user_input);
+            //     int flag = 0;
+            //     while(flag != 2) {
+            //         server_message = dio->read();
+            //         if(server_message == "$$$") {
+            //             break;
+            //         }
+            //         cout << server_message;
+            //         getline(cin, user_input);
+            //         this->uploadfile(dio, user_input);
+            //         flag += 1;
+            //     }
+            // }
+            // if (choice == 5 ) {
+            //     this->choiceTwo(dio);
+            // }
+            //     dio->write(user_input);
+            //     while(true) {
+            //         server_message = dio->read();
+            //         if(server_message == "$$$") {
+            //             break;
+            //         }
+            //         cout << server_message << endl;
+            //         getline(cin, user_input);
+            //         if (user_input == "") {
+            //             cout <<"OMG"<< endl;
+            //             dio->write(user_input);
+            //             break;
+            //         } else{
+            //             dio->write(user_input);
+            //         }
+
+
+            //     }
+            // }
+            // if (choice == 3 ) {
+            //     dio->write(user_input);
+            // }
+            // if (choice == 4) {
+            //     dio->write(user_input);
+            //     while (server_message != "Done.") {
+            //         server_message = dio->read();
+            //         if(server_message == "$$$") {
+            //             break;
+            //         }
+            //         cout << server_message<< endl;
+            //     }
+            // }
+            else if (user_input == "5") {
+            //     dio->write(user_input);
+            //     //lock thread?
+                // cout << "goint to exe " << user_input << endl;
+                dio->write(user_input);
+                server_message = dio->read();
+                if (server_message != "please upload data\n" && server_message != "please classify the data\n") {
+                    cout << "Enter file path:\n";
+                    getline(cin, user_input);
+                    std::thread t(std::bind(&Client::downloadfile, this, dio, user_input, server_message));
+                    // std::thread t(std::ref(this->downloadfile()), dio, user_input, server_message);
+                    cout << "Download complete." << endl;
+                    // cout << "\n";
+                } else {
+                    cout << server_message << endl;
+                }
+                // thread t(&Client::downloadfile, this, dio, user_input);
+            //     //unlock thread?
+            }
+            else if (user_input == "8") {
+                cout << "client inside 8\n";
+                dio->write(user_input);
+                try {
+                    t.join();
+                } catch (const std::exception& e) {
+                    cout << "problem in download\n";
+                }
+
                 close(sock);
                 return;
             }
+            // else {
+            //     this->choiceTwo(dio, user_input);
+            // }
+            cout<< "\n";
         }
     }
     catch (const exception &e) {

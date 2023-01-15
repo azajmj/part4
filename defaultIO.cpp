@@ -44,6 +44,7 @@ string SocketIO::read() {
     }
     memset(buffer, 0, sizeof(buffer));
     string message = ss.str();
+    // cout << "OMGGGG11`111GG:\n" << message << endl;
     return message;
 
     // string str = "";

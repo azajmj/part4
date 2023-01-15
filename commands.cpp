@@ -20,9 +20,13 @@ using namespace std;
 UploadCsv::UploadCsv(DefaultIO* dio, CommonData* commonData):Command(dio,commonData,"upload an unclassified csv data file"){}
 void UploadCsv::execute(){
     dio->write("Please upload your local train CSV file.\n");
+    // string content;
+    // content = this->dio->read();
+    // cout << "in commands::::" << content << endl;
     this->fileUpload("train_dataset.csv");
     commonData->train_path = "train_dataset.csv";
     commonData->isFileUploaded = true;
+    // cout << "IM HERE\n";
     dio->write("Please upload your local test CSV file.\n");
     this->fileUpload("test_dataset.csv");
     commonData->test_path = "test_dataset.csv";
@@ -30,41 +34,54 @@ void UploadCsv::execute(){
     // save here the test dataset with the test KNN field in the Common struct?
 }
 
-
 AlgSettings::AlgSettings(DefaultIO* dio, CommonData* commonData):Command(dio,commonData,"algorithm settings"){}
 void AlgSettings::execute(){
     string newParams;
     bool flag = true;
     while(flag){
-        dio->write("The current KNN parameters are: K = ");
-        dio->write(to_string(commonData->k));
-        dio->write(", distance mertic = ");
-        dio->write(commonData->metric);
-        dio->write("\n");
+        stringstream ss;
+        ss << "The current KNN parameters are: K = " << to_string(commonData->k) << ", distance mertic = " << commonData->metric << "\n";
+        dio->write(ss.str());
+        // dio->write("The current KNN parameters are: K = ");
+        // dio->write(to_string(commonData->k));
+        // dio->write(", distance mertic = ");
+        // dio->write(commonData->metric);
+        // dio->write("\n");
+        // cout << "before read in settings";
         newParams = dio->read();
+        // cout << "got new params they are " << newParams;
 
         //check if the newParams is empty, then return.
-        if (newParams.empty()){
+        if (newParams.empty() || newParams == " "){
+            // cout << "returning because empty\n";
             return;
         }
         // else - check validation for both and then update them..
         else
         {
             istringstream ss(newParams);
+            stringstream si;
             string token;
             getline(ss, token, ' ');
             try {
                 int nk = stoi(token);
                 commonData->k = nk;
             } catch (exception &e) {
-                dio->write("invalid value for k\n");
+                si << "invalid value for k\n";
+                // dio->write("invalid value for k\n");
             }
             getline(ss, token, ' ');
             if (token == "AUC" || token == "MIN" || token == "MAN" || token == "CAN" || token == "CHB") {
                 string nmetric = token;
                 commonData->metric = nmetric;
             } else {
-                dio->write("invalid value for metric\n");
+                si << "invalid value for metric\n";
+                // dio->write("invalid value for metric\n");
+            }
+            if (!si.str().empty()) {
+                dio->write(si.str());
+            } else {
+                dio->write("$$$");
             }
             return;
 
@@ -115,24 +132,25 @@ void Classify::execute(){
         // now we have vector like this:
         // content = [ (1,2,3,4,iris-v), (5,6,7,8,iris-d) ... ]
         int size = content.size();
-        vector<vector<string>> xTest;
+        vector<string> xTest;
         vector<string> yTest;
         int sampleSize = content[0].size();
         for (int i = 0; i < size ; i++) {
             vector<double> sample;
-            vector<string> samplest;
+            string samplest;
             string pred;
             for (int j = 0; j < sampleSize; ++j) {
                 string valst = content[i][j];
                 double val = stod(content[i][j]);
                 sample.push_back(val);
-                samplest.push_back(valst);
+                samplest += valst += " ";
             }
+        // cout << "ADDEDDDD: " << samplest << endl;
         xTest.push_back(samplest);
         pred = commonData->knn->predict(sample);
         yTest.push_back(pred);
         }
-        pair<vector<vector<string>>,vector<string>> result(xTest, yTest);
+        pair<vector<string>,vector<string>> result(xTest, yTest);
         commonData->predictions = result;
         commonData->isFileClassified = true;
     }
@@ -152,73 +170,122 @@ void Classify::execute(){
 
 Results::Results(DefaultIO* dio, CommonData* commonData):Command(dio,commonData,"display results"){}
 void Results::execute(){
+    // cout << "YES OK\n";
+    // stringstream ss;
     if (!commonData->isFileUploaded)
     {
+        // ss << "please upload data\n";
         dio->write("please upload data\n");
+        // dio->write("$$$");
         return;
     }
     if (!commonData->isFileClassified)
     {
+        // ss << "please classify the data\n";
         dio->write("please classify the data\n");
         return;
     }
+    // if (!ss.empty()) {
+    //     io->write(ss.str());
+    //     return;
+    // }
+    
     int size = commonData->predictions.first.size(); // = knn.size() ... get the CSV size that you loaded.
-    // stringstream ss;
+    stringstream ss;
     for(int i = 0; i < size; i++){
-        vector<string> xTest = commonData->predictions.first[i];
+        // string x = commonData->predictions.first[i];
         string label = commonData->predictions.second[i];
-        int sampleSize = xTest.size();
-        stringstream ss;
-        for(int j = 0; j < sampleSize; j++) {
-            ss << xTest[j];
-            if (j < sampleSize - 1) {
-                ss << ' ';
-            }
-        }
-        //print the file as they asked in the ass.
-        ss << '\t';
-        ss << label;
-        ss << '\n';
-        this->dio->write(ss.str());
+        // cout << "FFF " << i << "\t" << label << endl;
+        ss << (i+1) << "\t"  << label << "\n";
+        // int sampleSize = xTest.size();
+        // for(int j = 0; j < sampleSize; j++) {
+        //     cout << "OMG " << j << endl;
+        //     cout << "Adding " << xTest[j] << " for the vector " << i << endl;
+        //     ss += xTest[j] + " ";
+        //     cout << xTest[j] << endl;
+        // }
+        // ss.pop_back();
+        // ss += "\t" + label + "\n";
+        // cout << "RRrRRR" << ss << endl;
     }
-    this->dio->write("Done.\n");
+    // cout << "SERVER:\n" << ss << endl;
+    ss << "Done.\n";
+    this->dio->write(ss.str());
+    return;
+    // stringstream ss;
+    
+    // for(int i = 0; i < size; i++){
+    //     vector<string> xTest = commonData->predictions.first[i];
+    //     string label = commonData->predictions.second[i];
+    //     int sampleSize = xTest.size();
+    //     stringstream ss;
+    //     for(int j = 0; j < sampleSize; j++) {
+    //         ss << xTest[j];
+    //         if (j < sampleSize - 1) {
+    //             ss << ' ';
+    //         }
+    //     }
+    //     //print the file as they asked in the ass.
+    //     ss << '\t';
+    //     ss << label;
+    //     ss << endl;
+    //     string w;
+    //     w = ss.str();
+    //     cout << "IN SERVER: " << w << endl;
+    //     this->dio->write(w);
+    // }
+    // this->dio->write("Done.\n");
+    // return;
+}
+
+loadResults::loadResults(DefaultIO* dio, CommonData* commonData):Command(dio,commonData,"download results"){}
+void loadResults::execute(){
+    // cout << "YES OK\n";
+    // stringstream ss;
+    if (!commonData->isFileUploaded)
+    {
+        // ss << "please upload data\n";
+        dio->write("please upload data\n");
+        // dio->write("$$$");
+        return;
+    }
+    if (!commonData->isFileClassified)
+    {
+        // ss << "please classify the data\n";
+        dio->write("please classify the data\n");
+        return;
+    }
+    // if (!ss.empty()) {
+    //     io->write(ss.str());
+    //     return;
+    // }
+    
+    int size = commonData->predictions.first.size(); // = knn.size() ... get the CSV size that you loaded.
+    stringstream ss;
+    string label;
+    for(int i = 0; i < size; i++){
+        // string x = commonData->predictions.first[i];
+        label = commonData->predictions.second[i];
+        // cout << "FFF " << i << "\t" << label << endl;
+        ss << (i+1) << "\t"  << label << "\n";
+        // int sampleSize = xTest.size();
+        // for(int j = 0; j < sampleSize; j++) {
+        //     cout << "OMG " << j << endl;
+        //     cout << "Adding " << xTest[j] << " for the vector " << i << endl;
+        //     ss += xTest[j] + " ";
+        //     cout << xTest[j] << endl;
+        // }
+        // ss.pop_back();
+        // ss += "\t" + label + "\n";
+        // cout << "RRrRRR" << ss << endl;
+    }
+    // cout << "SERVER:\n" << ss << endl;
+    ss << "Done.\n";
+    // cout << "SERVER:\n" << ss.str() << endl;
+    this->dio->write(ss.str());
     return;
 }
 
-LoadResults::LoadResults(DefaultIO* dio, CommonData* commonData):Command(dio,commonData,"download results"){}
-void LoadResults::execute(){
-    if (!commonData->isFileUploaded)
-    {
-        dio->write("please upload data\n");
-        return;
-    }
-    if (!commonData->isFileClassified)
-    {
-        dio->write("please classify the data\n");
-        return;
-    }
-    int size = commonData->predictions.first.size(); // = knn.size() ... get the CSV size that you loaded.
-    // stringstream ss;
-    for(int i = 0; i < size; i++){
-        vector<string> xTest = commonData->predictions.first[i];
-        string label = commonData->predictions.second[i];
-        int sampleSize = xTest.size();
-        stringstream ss;
-        for(int j = 0; j < sampleSize; j++) {
-            ss << xTest[j];
-            if (j < sampleSize - 1) {
-                ss << ' ';
-            }
-        }
-        //print the file as they asked in the ass.
-        ss << '\t';
-        ss << label;
-        ss << '\n';
-        this->dio->write(ss.str());
-    }
-    this->dio->write("Done.\n");
-    return;
-}
 
 
 
