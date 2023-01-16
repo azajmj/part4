@@ -10,6 +10,5 @@ class Server {
         void handleClient(DefaultIO* dio, int client_sock);
     private:
         vector<thread> threads;
-        atomic<bool> running;
         int port;
 };

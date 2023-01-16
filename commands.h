@@ -20,6 +20,7 @@
 
 using namespace std;
 
+// will hold shared data to be reached by all commands
 struct CommonData {
     bool isFileUploaded;
     bool isFileClassified;
@@ -29,11 +30,11 @@ struct CommonData {
     string metric;
     KNNClassifier* knn;
     pair<vector<string>, vector<string>> predictions;
-    //todo - probably need to have more fields, like KNN object for the train and KNN object for test.
+    //init struct vals
     CommonData(): isFileUploaded(false),isFileClassified(false),k(5),metric("AUC"),knn(),predictions(){}
 };
 
-
+// parent class
 class Command{
 protected:
     DefaultIO* dio;
@@ -43,20 +44,17 @@ public:
     Command(DefaultIO* dio, CommonData* commonData, string description):dio(dio),commonData(commonData) ,description(description){}
     virtual void execute()=0;
     virtual ~Command(){}
+    // upload file function to be inherited
     virtual void fileUpload(string name){
         try {
             ofstream file(name);
             string line;
             string content;
             content = this->dio->read();
-            // cout << "iserver got:::::" << content << endl;
             istringstream ss(content);
-            // ss.str(ss.str() + "\n" + "done$\n");
-            // ss << "done$" << endl;
             do {
                 getline(ss, line, '\n');
                 if(line != "done$"){
-                    // cout << "inserver lineis77 " << line << endl;
                     file << line << endl;
                 } 
             } while (line != "done$");
@@ -67,9 +65,8 @@ public:
             this->dio->write("invalid input");
         }
 
-        // this function will load the classifier CSV, you can change it according to what you did in your
-        // previous ass.. this is just in general way..
-
+        // this function is the one written by Karnih:
+        
         // try{
         //     ofstream file(name);
         //     string line;

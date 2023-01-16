@@ -1,10 +1,8 @@
-//
-// Created by Lenovo on 10/01/2023.
-//
 
 #include "CLI.h"
 #include <sstream>
 using namespace std;
+// CLI to be used by the server
 
 CLI::CLI(DefaultIO* dio) {
     this->dio = dio;
@@ -18,19 +16,15 @@ CLI::CLI(DefaultIO* dio) {
     this->commands.push_back(new loadResults(dio, commonData));
     this->commands.push_back(new Exit(dio,commonData));
 }
-
+// destructor
 CLI::~CLI() {
     delete commonData;
     for (Command* command : commands) {
         delete command;
     }
-    // size_t size = commands.size();
-    // for (size_t i = 0; i < size; i++){
-    //     delete commands[i];
-    // }
 }
 
-//after adding 5th command change every 5 to 6
+// start method, 
 void CLI::start(){
     size_t size = commands.size();
 
@@ -39,39 +33,34 @@ void CLI::start(){
     bool isRunning = true;
     cout <<"Server Running...\n";
     while(isRunning){
-        // cout <<"printing menue\n";
+        // printing menu;
         stringstream ss;
         ss << "Welcome to the KNN Classifier Server. Please choose an option:\n";
-        // this->dio->write("Welcome to the KNN Classifier Server. Please choose an option:\n");
         for (size_t i = 0; i < size; i++){
             int index = i+1;
             if (index == 6) {
                 index = 8;
             }
+            //get the descriptions from commands
             ss << to_string(index) << ". " << commands[i]->description+"\n";
-            // this->dio->write(to_string(index));
-            // this->dio->write(". ");
-            // this->dio->write(commands[i]->description+"\n");
+
         }
         this->dio->write(ss.str());
         commandStr = this->dio->read();
         try {
+            // choose option to execute
             option = stoi(commandStr);
-            cout << "got option " << option << endl;
             if ((option >= 1 && option <= 5) || option == 8 ){
                 if (option == 8) {
-                    cout << "server in 8\n";
                     option = 6;
                     this->commands[option-1]->execute();
                     cout << "terminating client..\n";
                     isRunning = false;
                 }
-                // cout << "going to exe " << option << endl;
                 this->commands[option-1]->execute();
-                if (option == 5) {
-                    cout << "\n";
-                }
-                // cout << "returned from command"<< option <<"\n";
+                cout << "\n";
+                // dont know why doesnt work without another cout.
+                // otherwise client get stuck after some of the commands
 
             }
             else {
@@ -85,6 +74,5 @@ void CLI::start(){
         // cout << "send $$$\n";
         // this->dio->write("$$$");
     }
-    cout << "client off...\n";
     return;
 }

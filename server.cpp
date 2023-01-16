@@ -16,10 +16,12 @@
 #include "defaultIO.h"
 // #include <cstudio>
 #define MAX_MSG 100
+// gets port at init
 Server::Server(int port) {
     this->port = port;
 }
 Server::~Server() {}
+// handle client with a CLI object, when it returns ie client done, we close sock, and return to listen 
 void Server::handleClient(DefaultIO* dio, int client_sock) {
     CLI cli(dio);
     cli.start();
@@ -27,12 +29,10 @@ void Server::handleClient(DefaultIO* dio, int client_sock) {
     delete dio;
     return;
 }
-
+// start method runs the server
 void Server::start() {
     try{
-        // if (port == 0) {
-        //     throw invalid_argument("Expected an integer value for <server_port>");
-        // }
+        //create server 
         const int server_port = port;
         int sock = socket(AF_INET, SOCK_STREAM, 0);
         if (sock < 0) {
@@ -51,13 +51,18 @@ void Server::start() {
         }
         struct sockaddr_in client_sin;
         unsigned int addr_len = sizeof(client_sin);
+        // accept clients
         while(true) {
+            // accept
             int client_sock = accept(sock, (struct sockaddr *) &client_sin, &addr_len);
+            //create io object
             DefaultIO* dio = new SocketIO(client_sock);
+            // create thread
             thread t(&Server::handleClient, this, dio, client_sock);
+            // add to threads
             threads.push_back(move(t));
+            // fixs compilation error - not sure why?
             threads.back().detach();
-            //create thread for each new client and send to handle_client(thread)
             
         }
         // join threads
@@ -74,7 +79,7 @@ void Server::start() {
 
 int main(int argsc, char *argv[]) {
     int port = atoi(argv[1]);
-    // check arguments
+    // add check arguments
     Server server(port);
     try{
         server.start();
@@ -84,6 +89,8 @@ int main(int argsc, char *argv[]) {
     return 0;
 }
 
+
+// old server code not deleted yet...
 
 // int main(int argc, char *argv[]) {
 //     try {
