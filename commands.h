@@ -5,6 +5,7 @@
 #include<iostream>
 #include <string.h>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <math.h>
 #include <sys/socket.h>
@@ -19,6 +20,7 @@
 
 using namespace std;
 
+// will hold shared data to be reached by all commands
 struct CommonData {
     bool isFileUploaded;
     bool isFileClassified;
@@ -27,12 +29,12 @@ struct CommonData {
     string test_path;
     string metric;
     KNNClassifier* knn;
-    pair<vector<vector<string>>, vector<string>> predictions;
-    //todo - probably need to have more fields, like KNN object for the train and KNN object for test.
+    pair<vector<string>, vector<string>> predictions;
+    //init struct vals
     CommonData(): isFileUploaded(false),isFileClassified(false),k(5),metric("AUC"),knn(),predictions(){}
 };
 
-
+// parent class
 class Command{
 protected:
     DefaultIO* dio;
@@ -42,32 +44,54 @@ public:
     Command(DefaultIO* dio, CommonData* commonData, string description):dio(dio),commonData(commonData) ,description(description){}
     virtual void execute()=0;
     virtual ~Command(){}
+    // upload file function to be inherited
     virtual void fileUpload(string name){
-        // this function will load the classifier CSV, you can change it according to what you did in your
-        // previous ass.. this is just in general way..
-        try{
+        try {
             ofstream file(name);
             string line;
-
-            do
-            {
-                line = this->dio->read();
-                // assume the file end with "done", change this according to your files..
+            string content;
+            content = this->dio->read();
+            istringstream ss(content);
+            do {
+                getline(ss, line, '\n');
                 if(line != "done$"){
                     file << line << endl;
-                }
+                } 
             } while (line != "done$");
-            
             this->dio->write("Upload complete.\n");
             return;
-            // // close the file
-            // if(file.is_open())
-            //     file.close();
         } catch (...) {
+            cout << "error uploading file in server\n";
             this->dio->write("invalid input");
         }
+
+        // this function is the one written by Karnih:
+        
+        // try{
+        //     ofstream file(name);
+        //     string line;
+        //     do
+        //     {
+        //         line = this->dio->read();
+        //         cout << "recieved! " << line;
+        //         // assume the file end with "done", change this according to your files..
+        //         if(line != "done$"){
+        //             file << line << endl;
+        //         }
+        //     } while (line != "done$");
+            
+        //     this->dio->write("Upload complete.\n");
+        //     return;
+        //     // // close the file
+        //     // if(file.is_open())
+        //     //     file.close();
+        // } catch (...) {
+        //     cout << "errror\n";
+        //     this->dio->write("invalid input");
+        // }
     }
 };
+
 
 class UploadCsv:public Command{
 public:
@@ -94,7 +118,12 @@ public:
     virtual void execute();
 };
 
-// todo - need to write command for option 5..
+class loadResults:public Command{
+public:
+    loadResults(DefaultIO* dio, CommonData* commonData);
+
+    virtual void execute();
+};
 
 class Exit:public Command{
 public:

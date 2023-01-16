@@ -1,32 +1,30 @@
-OBJS	= distance.o knn.o CLI.o commands.o defaultIO.o main.o
-SOURCE	= distance.cpp knn.cpp CLI.cpp commands.cpp defaultIO.cpp main.cpp
-HEADER	= distance.h euc.h man.h cheb.h can.h mink.h knn.h CLI.h commands.h defaultIO.h
-OUT	= out
-CC	 = g++
-FLAGS	 = -g -c -Wall
-LFLAGS	 = 
+TARGETS = server.out client.out
+server_OBJS = distance.o knn.o CLI.o commands.o defaultIO.o server.o
+client_OBJS = distance.o knn.o client.o defaultIO.o
+SOURCES = distance.cpp knn.cpp server.cpp client.cpp CLI.cpp commands.cpp defaultIO.cpp
+HEADERS = distance.h euc.h man.h cheb.h can.h mink.h knn.h CLI.h client.h commands.h defaultIO.h server.h
+CC = g++
+CXXFLAGS=-g -c -Wall -pthread
 
-all: $(OBJS)
-	$(CC) -g $(OBJS) -o $(OUT) $(LFLAGS)
+all: $(TARGETS)
 
-distance.o: distance.cpp
-	$(CC) $(FLAGS) distance.cpp -std=c++17
+server.out: $(server_OBJS)
+	$(CC) -o $@ $^ -pthread
 
-knn.o: knn.cpp
-	$(CC) $(FLAGS) knn.cpp -std=c++17
+client.out: $(client_OBJS)
+	$(CC) -o $@ $^ -pthread
 
-CLI.o: CLI.cpp
-	$(CC) $(FLAGS) CLI.cpp -std=c++17
+%.o: %.cpp
+	$(CC) $(CXXFLAGS) -o $@ $<
 
-commands.o: commands.cpp
-	$(CC) $(FLAGS) commands.cpp -std=c++17
-
-defaultIO.o: defaultIO.cpp
-	$(CC) $(FLAGS) defaultIO.cpp -std=c++17
-
-main.o: main.cpp
-	$(CC) $(FLAGS) main.cpp -std=c++17
-
+# server.o: server.cpp server.h distance.h euc.h man.h cheb.h can.h mink.h knn.h CLI.h defaultIO.h
+# client.o: client.cpp client.h distance.h euc.h man.h cheb.h can.h mink.h knn.h defaultIO.h
+# distance.o: distance.cpp distance.h
+# knn.o: knn.cpp knn.h distance.h euc.h man.h cheb.h can.h mink.h
+# CLI.o: CLI.cpp CLI.h
+# commands.o: commands.cpp commands.h
+# defaultIO.o: defaultIO.cpp defaultIO.h
 
 clean:
-	rm -f $(OBJS) $(OUT)
+	rm -f *.o $(TARGETS)
+

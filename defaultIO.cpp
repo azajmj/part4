@@ -3,7 +3,15 @@
 #include<iostream>
 #include <string.h>
 #include <fstream>
+#include <sstream>
 #include <vector>
+#include <iostream>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 string StandardIO::read() {
     string s;
     getline(cin, s);
@@ -13,26 +21,36 @@ void StandardIO::write(string text) {
     cout << text;
 }
 
-// class socketIO : public DefaultIO{
-//     int clientID;
-// public:
-//     socketIO(int clientid){
-//         this->clientID = clientid;
-//     }
 
-//     virtual string read(){
-//         string str = "";
-//         char ch = 0;
-//         ::read(clientID, &ch, sizeof(char));
-//         while (ch != '\n') {
-//             str += ch;
-//             ::read(clientID, &ch, sizeof(char));
-//         }
-//         return str;
+SocketIO::SocketIO(int socket){
+        this->socketID = socket;
+}
 
-//     }
+string SocketIO::read() {
+    // all the requriments for TCP read
+    char buffer[4096];
+    int bytesReceived = recv(this->socketID, buffer, 4096, 0);
+    if (bytesReceived < 0) {
+        cout << "Error receiving message" << endl;
+        return "Error receiving message";
+    }
+    int index = 0;
+    stringstream ss;
+    while(buffer[index] != '\0')
+    {
+        ss << buffer[index];
+        index++;
+    }
+    memset(buffer, 0, sizeof(buffer));
+    string message = ss.str();
+    return message;
 
-//     virtual void write(string text){
-//         ::write(clientID, text.c_str(), text.length());
-//     }
-// };
+}
+
+void SocketIO::write(string message){
+    // send through socket
+    if (send(this->socketID, message.c_str(), message.size(), 0) < 0) {
+            cout << "Error sending message " << endl;
+    }
+    return;
+}
