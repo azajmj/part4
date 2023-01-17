@@ -26,19 +26,18 @@ string Client::uploadfile(DefaultIO* dio, string file_path) {
     // string response;
     stringstream ss;
     //open the file and check if opening the file worked.
-    if (file.is_open())
+    if (file.good())
     {
         string line;
         // start read the file content.
         // as long as we have lines to read OR to 120 lines of content- to fit the sockets buffer.
         try {
-            int flag = 0;
             while(getline(file, line)) {
-                ss << line << endl;;
-                if (flag == 120) {
+                if(ss.tellp() + line.length() + 1 > 4096) {
+        // leave enough space to add 'done$'
                     break;
                 }
-                flag++;
+                ss << line << endl;
             }
             // add done for conventions at server
             ss << "done$" << endl;
@@ -81,6 +80,8 @@ void Client::downloadfile(DefaultIO* dio, string file_path, string content) {
     } catch (...) {
         cout <<"invalid file path\n";
     }
+    this->downloaded = true;
+    cout << "Download complete." << endl;
     return;
 }
 // check if menu option valid
@@ -198,6 +199,7 @@ void Client::start() {
                 dio->write(user_input);
                 // get response
                 server_message = dio->read();
+                this->downloaded = false;
                 cout << server_message << endl;;
                 server_message = "";
                 user_input = "";
@@ -224,8 +226,7 @@ void Client::start() {
                     // start a thread to do downloadfile with path(userinput) and content(servermessage) as arguments
                     // two ways not sure which is better
                     // std::thread t(std::bind(&Client::downloadfile, this, dio, user_input, server_message));
-                    thread t(&Client::downloadfile, this, dio, user_input, server_message);
-                    cout << "Download complete." << endl;
+                    this->t = thread(&Client::downloadfile, this, dio, user_input, server_message);
                 } else {
                     // not uploaded or calssified error
                     cout << server_message << endl;
@@ -236,17 +237,19 @@ void Client::start() {
                 //execute
                 dio->write(user_input);
                 // join on download thread
-                try {
-                    t.join();
-                } catch (const std::exception& e) {
-                    cout << "problem in download\n";
+                if (this->t.joinable()) {
+                    if(!this->downloaded){
+                        try {
+                            t.join();
+                        } catch (const std::exception& e) {
+                            cout << "problem in download thread\n";
+                        }
+                    }
                 }
-                // right now theres a segmentation fault when exiting
                 close(sock);
                 return;
             }
-            // reads not in sync without this cout for some reason
-            cout<< "\n";
+            // cout<< "\n";
         }
     }
     catch (const exception &e) {
