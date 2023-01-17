@@ -12,6 +12,8 @@ class Client {
         // void* downloadWrapper(void* args);
     private:
         DefaultIO* dio;
+        thread t;
+        bool downloaded = false;
         int port;
         string ip;
 };

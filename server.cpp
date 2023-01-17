@@ -24,7 +24,11 @@ Server::~Server() {}
 // handle client with a CLI object, when it returns ie client done, we close sock, and return to listen 
 void Server::handleClient(DefaultIO* dio, int client_sock) {
     CLI cli(dio);
-    cli.start();
+    try {
+        cli.start();
+    } catch (...)  {
+        cout << "client closed\n";
+    }
     close(client_sock);
     delete dio;
     return;
@@ -59,9 +63,9 @@ void Server::start() {
             DefaultIO* dio = new SocketIO(client_sock);
             // create thread
             thread t(&Server::handleClient, this, dio, client_sock);
-            // add to threads
+            // add to threads + (move() --> suggested by chatGTP)
             threads.push_back(move(t));
-            // fixs compilation error - not sure why?
+            // fixs compilation error - does it make sense to detach?
             threads.back().detach();
             
         }
@@ -69,6 +73,7 @@ void Server::start() {
         for (auto &t : threads) {
             t.join();
         }
+        cout << "closing server socket" << endl;
         close(sock);
     } catch (const exception &e) {
     cerr << e.what() << endl;

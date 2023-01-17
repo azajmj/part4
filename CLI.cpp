@@ -58,7 +58,7 @@ void CLI::start(){
                     isRunning = false;
                 }
                 this->commands[option-1]->execute();
-                cout << "\n";
+                // cout << "\n";
                 // dont know why doesnt work without another cout.
                 // otherwise client get stuck after some of the commands
 
@@ -71,6 +71,9 @@ void CLI::start(){
         catch (const invalid_argument&){
 
         }
+        // After the command execution
+    std::this_thread::sleep_for(std::chrono::milliseconds(300)); // delay for 300ms
+
         // cout << "send $$$\n";
         // this->dio->write("$$$");
     }
