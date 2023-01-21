@@ -1,70 +1,73 @@
-# KNN Classifier Server/Client
+In this exercise our server will have to handle several clients at the same time. That is, at a given moment, the server can talk to several different clients at the same time.
+When in the exercise it says client - it means the client talking to the server, that is, it is about the code you are writing. When it says user - it means a "human being" who communicates with the help of the client in front of the server.
+The client (not the user) in this exercise is often "dumb" - that is, sends information to the server that the user entered and prints to the user information that the server sent to him.
+When a client connects to the server, the server will send the client a text detailing the server's function. The client will print to the screen the text received from the server.
+Specifically, the server must send the following text to the client:
 
-This project contains a TCP server and client that implements a KNN classifier. The server runs the classifier and listens for incoming connections from clients, while the client sends unclassified vectors to the server for classification and receives the classification back from the server and then prints out the clasification. 
+## insert pic
 
-server will be activated as follows:
-server.out file port
-
-Where: 
-- file is the name of the tagged vector file (can be a relative or full address)
-- port is the port number on which the server should listen
-
-The client will be activated as follows:
-client.out ip port
-
-where: 
-- port is the port number on which the server listens 
-- ip is the ip address of the server.
+# If the user typed 1 and enter, the user will be given the option to type a path to a local csv file on his computer, and after pressing enter the client will send the contents of the file to the server. At the end of sending, the server will send back to the client a ".Upload complete" message. If the path is invalid, "invalid input" will be printed (and you return to the main menu). It should look like this:
 
 
-## Client:
-The client runs in an infinite loop, and receives input from the user: vector distance k
-Where: 
-- vector is the vector for classification. 
-- distance is the distance metric. 
-- k is the number of neighbors.
+## insert pic
 
-### Client Input Format
-- vector: Vectors can contain integers and float values only. Ensure that when inputting the vector there is a single space between each number.
-- distance metric: one of the following strings: AUC, MAN, CHB, CAN, MIN. If MIN (Minkowski) distance was chosen, you will be prompted to enter a p value
-- k: any positive int value.
 
-The client sends the information received from the user to the server. It then receives the classification back from the server and prints the received answer to the screen on a separate line and receives the next input from the user.
-- If the user enters the input -1 the client closes the connection to the server and closes the program. 
-- In any case of invalid input, to the client, the client must print invalid input only and continue to receive the next input.
+If the user presses enter, the parameters must be left unchanged (make sure the values are initialized to the values in the example above). Otherwise, the user can enter new values separated by a space, where K can have a range of integer values and the distance meter can have the values we saw in the previous exercise) 5 metrics). If everything is correct - return to the main menu. If the user entered an invalid value - the error message will be returned: invalid value for K or invalid value for metric (if necessary - print both). Then - return to the main menu (without Change - even if one of the parameters was valid.
 
-## Server:
-Listens for incoming connections. Once it gets a connection, it gets the information from the client, deciphers it and sends the vector, distance and k it got to the KNN classifier in order to classify the vector. It then sends the classification back to client and continues waiting for more messages. If the client enters -1, the connection with that client and the server will be closed and the server will continue to the next connection (the server does not close).
-- In any case that the server receives invalid input from the client, the server must return invalid input to the client and continue receiving information from that client.
+# If the user chose 3, the server will run the algorithm on the previously uploaded CSV files. At the end of the run, the server will write "classifying data complete" and we will return to the main menu. If no files have been uploaded yet, print "please upload data".
 
-## Building and Running
+# If the user selected 4, the server will return the list of classifications. For each classification, the printout will be as follows: the number of the line in the test file, a tab, the classification, and then a line break. Finally, ".Done" will be printed after the user's enter to return to the main menu.
+where A, B, C are the classification classes. If no files have been uploaded yet, print "please upload data". If the files to be printed have not yet been classified "please classify the data".
 
-To build and run the server and client executables, run the make file by executing the following command:
+## insert pic
 
-Step-by-step compiling and running instructions:
+# If the user chose 5, the behavior will be similar to that of option 4, only that instead of printing the results, the user will enter a path to create the file locally and there the client will save the results, in exactly the same format (without Done).
+ - Please note: unlike the other commands, in this command after the user enters a path (who entered a path to the file) the main menu will immediately appear again and the user will be able to send additional commands immediately, even if the download of the file has not yet finished (that is, this process will happen cn a separate thread).
 
-compiling:
+# If the user chose 8, the interaction between the server and the client will end (don't forget to close and release the connection and resources).
 
-- open Terminal
 
-- type 'git clone https://github.com/itaialcalai/part3.git'
+This process will be repeated twice, when the first time you receive a file for training the classifier and the second time a file for his exam. Accordingly, for the first time will appear:
+Please upload your local train CSV file. Please upload your local test CSV file.
+If the user selected 2, the server will send the current classifier parameter values which are the K parameter value and the current distance metric.
+And in the second: ￼￼￼￼ after finishing uploading the second file, the main menu will be displayed again.
 
-- type 'cd part3'
 
-- type 'make'
 
-This will create the server.out and client.out executables using the Makefile provided in the project, start the server listening on the specified port, and run the client to connect to the server and send unclassified vectors for classification. 
 
-running:
+# If the user selected 2, the server will send the current classifier parameter values which are the K parameter value and the current distance metric.
 
-for running the server:
-- type './server.out <file> <port>'
-and the server will run indf
+ ## pic
 
-for running the client:
-- type './client.out <ip> <port>'
-Once the code is client is running, you can enter a vector of data points, distance metric by the three letter code, and value k for the knn classifier, then press enter to get the predicted class from the server, as instructed above under client.
-- type '-1' to terminate the client
 
-- when selecting mink distance metric the server will be prompt to enter p value
 
+
+
+
+
+
+# Exercise 4 - Multi-Client Server
+
+## Overview
+
+This project is an exercise in implementing a server-client system where the server can handle multiple clients simultaneously. The server is responsible for handling requests from the clients, which are "dumb" in the sense that they simply send information entered by the user and display information received from the server. We implemented the project using the Command design pattern
+
+
+![image](https://user-images.githubusercontent.com/118285361/213496798-c8a85ca2-e37d-4f36-b3f9-e6bce53ca888.png)
+
+
+The server can handle the following requests from the clients:
+- Uploading a local CSV file for training or testing the classifier
+- Retrieving the current classifier parameter values (K and distance metric)
+- Running the algorithm on the previously uploaded CSV files
+- Retrieving the list of classifications
+- Saving the list of classifications to a local file
+- Ending the interaction between the server and client
+
+### note: 
+* The code handles invalid input and displays appropriate error messages
+* Saving the list of classifications to a local file happens in a separate thread
+* Connection and resources are closed and released when the interaction between the server and client ends.
+
+## How to Run
+write "make" in terminal 
